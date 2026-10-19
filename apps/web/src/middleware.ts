@@ -1,20 +1,20 @@
-import { updateSession } from '@/utils/supabase/middleware';
+import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-    const result = await updateSession(request);
-    return result;
-}
+export function middleware(request: NextRequest) {
+  // Tự động cho phép trình duyệt gọi CORS từ bất kỳ đâu
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-goog-api-key',
+      },
+    });
+  }
 
-export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * Feel free to modify this pattern to include more paths.
-         */
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    ],
-};
+  const response = NextResponse.next();
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  return response;
+}
